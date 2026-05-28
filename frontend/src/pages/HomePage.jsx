@@ -1,5 +1,3 @@
-// 홈 페이지 (대시보드) — 오늘 육아 현황을 한눈에 보여줍니다
-
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import Card from '../components/common/Card'
@@ -8,38 +6,55 @@ import { getFeeds } from '../api/feedApi'
 import { getSleeps } from '../api/sleepApi'
 import { getGrowths } from '../api/growthApi'
 import { getVaccines } from '../api/vaccineApi'
-import { isToday, formatDate, formatAge } from '../utils/dateUtils'
-import { calcTodaySleepHours } from '../utils/timeUtils'
+import { getDiapers } from '../api/diaperApi'
+import { isToday, formatDate, formatAge, formatTime, formatDateTime } from '../utils/dateUtils'
+import { calcTodaySleepHours, timeAgo, formatDuration } from '../utils/timeUtils'
+
+const FEED_TYPE_LABEL = {
+  breast: '🤱 모유',
+  formula: '🍼 분유',
+  baby_food: '🥣 이유식',
+  snack: '🍪 간식',
+  water: '💧 물',
+}
+
+const DIAPER_TYPE_LABEL = {
+  pee: '💧 소변',
+  poo: '💩 대변',
+  both: '💧💩 둘 다',
+}
 
 export default function HomePage() {
   const selectedChild = useChildStore((state) => state.selectedChild)
   const childId = selectedChild?.id
 
-  // 오늘의 수유 기록
   const { data: feeds = [] } = useQuery({
     queryKey: ['feeds', childId],
     queryFn: () => getFeeds(childId).then((r) => r.data),
     enabled: !!childId,
   })
 
-  // 수면 기록
   const { data: sleeps = [] } = useQuery({
     queryKey: ['sleeps', childId],
     queryFn: () => getSleeps(childId).then((r) => r.data),
     enabled: !!childId,
   })
 
-  // 성장 기록 (가장 최근 몸무게 표시)
   const { data: growths = [] } = useQuery({
     queryKey: ['growths', childId],
     queryFn: () => getGrowths(childId).then((r) => r.data),
     enabled: !!childId,
   })
 
-  // 예방접종 (다가오는 일정)
   const { data: vaccines = [] } = useQuery({
     queryKey: ['vaccines', childId],
     queryFn: () => getVaccines(childId).then((r) => r.data),
+    enabled: !!childId,
+  })
+
+  const { data: diapers = [] } = useQuery({
+    queryKey: ['diapers', childId],
+    queryFn: () => getDiapers(childId).then((r) => r.data),
     enabled: !!childId,
   })
 
@@ -58,6 +73,47 @@ export default function HomePage() {
     .sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at))
     .slice(0, 3)
 
+  // 마지막 기록 시간
+  const lastFeed = [...feeds].sort((a, b) => new Date(b.fed_at) - new Date(a.fed_at))[0]
+  const lastSleep = [...sleeps].sort((a, b) => new Date(b.sleep_at) - new Date(a.sleep_at))[0]
+  const lastDiaper = [...diapers].sort((a, b) => new Date(b.changed_at) - new Date(a.changed_at))[0]
+
+  // 전체 기록을 내림차순으로 합친 리스트
+  const allRecords = [
+    ...feeds.map((f) => ({
+      key: `feed-${f.id}`,
+      time: f.fed_at,
+      icon: '🍼',
+      label: FEED_TYPE_LABEL[f.feed_type] || f.feed_type,
+      sub: f.amount ? `${f.amount}ml` : '',
+      to: '/feed',
+      color: 'text-blue-600',
+      bg: 'bg-blue-50',
+    })),
+    ...sleeps.map((s) => ({
+      key: `sleep-${s.id}`,
+      time: s.sleep_at,
+      icon: '😴',
+      label: s.wake_at ? `수면 ${formatDuration(s.sleep_at, s.wake_at)}` : '수면 중',
+      sub: '',
+      to: '/sleep',
+      color: 'text-indigo-600',
+      bg: 'bg-indigo-50',
+    })),
+    ...diapers.map((d) => ({
+      key: `diaper-${d.id}`,
+      time: d.changed_at,
+      icon: '🧷',
+      label: DIAPER_TYPE_LABEL[d.type] || d.type,
+      sub: d.note || '',
+      to: '/diaper',
+      color: 'text-yellow-600',
+      bg: 'bg-yellow-50',
+    })),
+  ]
+    .sort((a, b) => new Date(b.time) - new Date(a.time))
+    .slice(0, 20)
+
   return (
     <div className="space-y-4">
       {/* 아이 정보 헤더 */}
@@ -73,7 +129,6 @@ export default function HomePage() {
       {/* 오늘 요약 카드 */}
       <h3 className="text-sm font-semibold text-gray-500 px-1">오늘 현황</h3>
       <div className="grid grid-cols-2 gap-3">
-        {/* 수유 횟수 */}
         <Link to="/feed">
           <Card className="text-center hover:shadow-md transition-shadow">
             <div className="text-3xl mb-1">🍼</div>
@@ -82,7 +137,6 @@ export default function HomePage() {
           </Card>
         </Link>
 
-        {/* 수면 시간 */}
         <Link to="/sleep">
           <Card className="text-center hover:shadow-md transition-shadow">
             <div className="text-3xl mb-1">😴</div>
@@ -91,7 +145,6 @@ export default function HomePage() {
           </Card>
         </Link>
 
-        {/* 최근 몸무게 */}
         <Link to="/growth">
           <Card className="text-center hover:shadow-md transition-shadow">
             <div className="text-3xl mb-1">⚖️</div>
@@ -102,7 +155,6 @@ export default function HomePage() {
           </Card>
         </Link>
 
-        {/* 다가오는 접종 */}
         <Link to="/vaccine">
           <Card className="text-center hover:shadow-md transition-shadow">
             <div className="text-3xl mb-1">💉</div>
@@ -112,13 +164,40 @@ export default function HomePage() {
         </Link>
       </div>
 
+      {/* 마지막 기록 경과 시간 */}
+      <Card>
+        <h3 className="text-sm font-semibold text-gray-700 mb-3">⏱ 마지막 기록</h3>
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <Link to="/feed" className="space-y-1 py-2 rounded-xl hover:bg-blue-50 transition-colors">
+            <div className="text-xl">🍼</div>
+            <div className="text-xs text-gray-500">수유</div>
+            <div className="text-xs font-semibold text-blue-600">
+              {timeAgo(lastFeed?.fed_at) ?? '없음'}
+            </div>
+          </Link>
+          <Link to="/diaper" className="space-y-1 py-2 rounded-xl hover:bg-yellow-50 transition-colors">
+            <div className="text-xl">🧷</div>
+            <div className="text-xs text-gray-500">기저귀</div>
+            <div className="text-xs font-semibold text-yellow-600">
+              {timeAgo(lastDiaper?.changed_at) ?? '없음'}
+            </div>
+          </Link>
+          <Link to="/sleep" className="space-y-1 py-2 rounded-xl hover:bg-indigo-50 transition-colors">
+            <div className="text-xl">😴</div>
+            <div className="text-xs text-gray-500">수면</div>
+            <div className="text-xs font-semibold text-indigo-600">
+              {timeAgo(lastSleep?.sleep_at) ?? '없음'}
+            </div>
+          </Link>
+        </div>
+      </Card>
+
       {/* 다가오는 예방접종 */}
       {upcomingVaccines.length > 0 && (
         <Card>
           <h3 className="text-sm font-semibold text-gray-700 mb-3">💉 다가오는 예방접종</h3>
           <ul className="space-y-2">
             {upcomingVaccines.map((v) => {
-              // 접종일이 지났으면 빨간색, 7일 이내이면 주황색
               const daysLeft = Math.ceil(
                 (new Date(v.scheduled_at) - new Date()) / (1000 * 60 * 60 * 24)
               )
@@ -146,27 +225,40 @@ export default function HomePage() {
         </Card>
       )}
 
-      {/* 빠른 이동 버튼들 */}
+      {/* 최근 기록 전체 리스트 */}
       <Card>
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">📋 기록하기</h3>
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { to: '/feed', icon: '🍼', label: '수유' },
-            { to: '/sleep', icon: '😴', label: '수면' },
-            { to: '/growth', icon: '📏', label: '성장' },
-            { to: '/vaccine', icon: '💉', label: '접종' },
-            { to: '/diary', icon: '📝', label: '일기' },
-          ].map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className="flex flex-col items-center py-3 rounded-xl bg-gray-50 hover:bg-blue-50 transition-colors"
-            >
-              <span className="text-xl">{item.icon}</span>
-              <span className="text-xs text-gray-600 mt-1">{item.label}</span>
-            </Link>
-          ))}
-        </div>
+        <h3 className="text-sm font-semibold text-gray-700 mb-3">📋 최근 기록</h3>
+        {allRecords.length === 0 ? (
+          <p className="text-center text-gray-400 text-sm py-4">아직 기록이 없어요.</p>
+        ) : (
+          <ul className="space-y-1">
+            {allRecords.map((record) => (
+              <li key={record.key}>
+                <Link
+                  to={record.to}
+                  className="flex items-center gap-3 py-2 px-2 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                >
+                  <span className={`w-8 h-8 rounded-full ${record.bg} flex items-center justify-center text-base flex-shrink-0`}>
+                    {record.icon}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm text-gray-800">
+                      {record.label}
+                      {record.sub && (
+                        <span className={`ml-1.5 text-xs font-semibold ${record.color}`}>
+                          {record.sub}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-400 flex-shrink-0">
+                    {isToday(record.time) ? formatTime(record.time) : formatDateTime(record.time)}
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </Card>
     </div>
   )

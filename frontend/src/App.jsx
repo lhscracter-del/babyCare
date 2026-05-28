@@ -16,6 +16,7 @@ import SleepPage from './pages/SleepPage'
 import GrowthPage from './pages/GrowthPage'
 import VaccinePage from './pages/VaccinePage'
 import DiaryPage from './pages/DiaryPage'
+import DiaperPage from './pages/DiaperPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { to: '/', icon: '🏠', label: '홈' },
   { to: '/feed', icon: '🍼', label: '수유' },
   { to: '/sleep', icon: '😴', label: '수면' },
+  { to: '/diaper', icon: '🧷', label: '기저귀' },
   { to: '/growth', icon: '📏', label: '성장' },
   { to: '/vaccine', icon: '💉', label: '접종' },
   { to: '/diary', icon: '📝', label: '일기' },
@@ -420,6 +422,7 @@ function MainApp() {
           <Route path="/growth" element={<GrowthPage />} />
           <Route path="/vaccine" element={<VaccinePage />} />
           <Route path="/diary" element={<DiaryPage />} />
+          <Route path="/diaper" element={<DiaperPage />} />
         </Routes>
       </main>
 

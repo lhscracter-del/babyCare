@@ -78,7 +78,8 @@ export default function FeedForm({ onSubmit, isLoading }) {
         <input
           type="text"
           placeholder="예: 잘 먹었어요"
-          {...register('note')}
+          {...register('note', { maxLength: 20 })}
+          maxLength={20}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>

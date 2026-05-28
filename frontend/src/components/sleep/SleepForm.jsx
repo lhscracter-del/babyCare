@@ -55,12 +55,12 @@ export default function SleepForm({ onSubmit, isLoading }) {
           {...register('quality')}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
         >
-          <option value="">선택 안함</option>
-          <option value="5">😄 매우 좋음</option>
-          <option value="4">😊 좋음</option>
-          <option value="3">😐 보통</option>
-          <option value="2">😞 나쁨</option>
-          <option value="1">😫 매우 나쁨</option>
+          <option value="">-</option>
+          <option value="5">😄</option>
+          <option value="4">😊</option>
+          <option value="3">😐</option>
+          <option value="2">😞</option>
+          <option value="1">😫</option>
         </select>
       </div>
 

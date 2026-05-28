@@ -35,3 +35,17 @@ export function formatQuality(quality) {
   const map = { 1: '😫 매우 나쁨', 2: '😞 나쁨', 3: '😐 보통', 4: '😊 좋음', 5: '😄 매우 좋음' }
   return map[quality] || '-'
 }
+
+// 과거 시각으로부터 현재까지 경과 시간을 "X시간 X분 전" 형태로 반환합니다
+export function timeAgo(dateStr) {
+  if (!dateStr) return null
+  const diffMs = Date.now() - new Date(dateStr).getTime()
+  if (diffMs < 0) return '방금 전'
+  const minutes = Math.floor(diffMs / (1000 * 60))
+  if (minutes < 1) return '방금 전'
+  if (minutes < 60) return `${minutes}분 전`
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  if (mins === 0) return `${hours}시간 전`
+  return `${hours}시간 ${mins}분 전`
+}
