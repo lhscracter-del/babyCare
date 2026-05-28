@@ -13,8 +13,6 @@ UPLOAD_DIR = Path(__file__).parent / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 
-print(settings.DATABASE_URL)
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # noqa: ARG001
     await create_tables()

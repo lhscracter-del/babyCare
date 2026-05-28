@@ -40,6 +40,14 @@ async def login(db: AsyncSession, data: LoginRequest) -> TokenResponse:
     return TokenResponse(access_token=access_token, refresh_token=refresh_token)
 
 
+async def get_user_by_id(db: AsyncSession, user_id: int) -> User:
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return user
+
+
 async def refresh_token(db: AsyncSession, data: RefreshRequest) -> TokenResponse:
     payload = decode_token(data.refresh_token)
     if not payload or payload.get("type") != "refresh":

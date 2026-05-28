@@ -1,11 +1,12 @@
 // 앱의 최상위 컴포넌트 — 화면 전환(라우팅), 하단 내비게이션, 아이 관리 시트를 담당합니다
 
 import { useEffect, useState } from 'react'
-import { Routes, Route, NavLink, useLocation } from 'react-router-dom'
+import { Routes, Route, NavLink, useLocation, Navigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 
 import useChildStore from './store/childStore'
+import useAuthStore from './store/authStore'
 import { getChildren, createChild, updateChild, deleteChild } from './api/childApi'
 import { formatDate, formatAge } from './utils/dateUtils'
 
@@ -15,6 +16,8 @@ import SleepPage from './pages/SleepPage'
 import GrowthPage from './pages/GrowthPage'
 import VaccinePage from './pages/VaccinePage'
 import DiaryPage from './pages/DiaryPage'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
 
 const NAV_ITEMS = [
   { to: '/', icon: '🏠', label: '홈' },
@@ -294,11 +297,11 @@ function ChildSetup({ onRegistered }) {
   )
 }
 
-// ── 앱 메인 컴포넌트 ─────────────────────────────────────────────────────────
+// ── 인증된 상태의 메인 앱 ────────────────────────────────────────────────────
 
-export default function App() {
+function MainApp() {
   const { selectedChild, setSelectedChild, setChildren } = useChildStore()
-  const location = useLocation()
+  const { logout } = useAuthStore()
   const queryClient = useQueryClient()
   const [showChildManager, setShowChildManager] = useState(false)
 
@@ -312,13 +315,18 @@ export default function App() {
     if (!children) return
     setChildren(children)
 
-    if (!selectedChild && children.length > 0) {
-      setSelectedChild(children[0])
+    if (children.length === 0) {
+      setSelectedChild(null)
       return
     }
-    // 선택된 아이가 목록에서 사라진 경우 (삭제 등) — 첫 번째로 전환
-    if (selectedChild && !children.find((c) => c.id === selectedChild.id)) {
-      setSelectedChild(children[0] ?? null)
+
+    // localStorage에 저장된 아이가 여전히 유효한지 확인
+    const stillExists = selectedChild && children.find((c) => c.id === selectedChild.id)
+    if (!stillExists) {
+      setSelectedChild(children[0])
+    } else {
+      // 서버의 최신 데이터로 갱신 (이름/생일 변경 반영)
+      setSelectedChild(children.find((c) => c.id === selectedChild.id))
     }
   }, [children]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -377,17 +385,30 @@ export default function App() {
           <span className="font-bold text-gray-800">babyCare</span>
         </div>
 
-        {/* 아이 이름 버튼 — 클릭 시 관리 시트 열림 */}
-        {selectedChild && (
+        <div className="flex items-center gap-2">
+          {/* 아이 이름 버튼 — 클릭 시 관리 시트 열림 */}
+          {selectedChild && (
+            <button
+              onClick={() => setShowChildManager(true)}
+              className="flex items-center gap-1.5 text-sm text-gray-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors"
+            >
+              <span>{selectedChild.gender === 'F' ? '👧' : '👦'}</span>
+              <span className="font-medium">{selectedChild.name}</span>
+              <span className="text-gray-400 text-xs">▾</span>
+            </button>
+          )}
+          {/* 로그아웃 */}
           <button
-            onClick={() => setShowChildManager(true)}
-            className="flex items-center gap-1.5 text-sm text-gray-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors"
+            onClick={() => {
+              logout()
+              setSelectedChild(null)
+              queryClient.clear()
+            }}
+            className="text-xs text-gray-400 hover:text-red-400 px-2 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
           >
-            <span>{selectedChild.gender === 'F' ? '👧' : '👦'}</span>
-            <span className="font-medium">{selectedChild.name}</span>
-            <span className="text-gray-400 text-xs">▾</span>
+            로그아웃
           </button>
-        )}
+        </div>
       </header>
 
       {/* 페이지 콘텐츠 */}
@@ -435,4 +456,22 @@ export default function App() {
       )}
     </div>
   )
+}
+
+// ── 앱 진입점 — 인증 여부에 따라 라우팅 분기 ─────────────────────────────────
+
+export default function App() {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+
+  if (!isAuthenticated) {
+    return (
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    )
+  }
+
+  return <MainApp />
 }
