@@ -9,15 +9,6 @@ from app.core.config import settings
 from app.core.database import create_tables
 from app.api.router import api_router
 
-from fastapi.middleware.cors import CORSMiddleware
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://your-frontend.onrender.com"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 UPLOAD_DIR = Path(__file__).parent / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
