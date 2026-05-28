@@ -5,6 +5,7 @@ from app.models.sleep_record import SleepRecord
 from app.models.growth_record import GrowthRecord
 from app.models.vaccine_schedule import VaccineSchedule
 from app.models.diary_entry import DiaryEntry
+from app.models.diaper_record import DiaperRecord
 
 __all__ = [
     "User",
@@ -14,4 +15,5 @@ __all__ = [
     "GrowthRecord",
     "VaccineSchedule",
     "DiaryEntry",
+    "DiaperRecord",
 ]
