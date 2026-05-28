@@ -44,7 +44,7 @@ export default function DiaperForm({ onSubmit, isLoading }) {
         <input
           type="datetime-local"
           {...register('changed_at', { required: true })}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          className="w-full min-w-0 max-w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
         />
       </div>
 
@@ -57,7 +57,7 @@ export default function DiaperForm({ onSubmit, isLoading }) {
           placeholder="예: 묽음, 색 이상"
           {...register('note')}
           maxLength={20}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          className="w-full min-w-0 max-w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
         />
       </div>
 
