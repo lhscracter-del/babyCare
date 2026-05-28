@@ -30,7 +30,7 @@ export default function SleepForm({ onSubmit, isLoading }) {
         <input
           type="datetime-local"
           {...register('sleep_at', { required: true })}
-          className="w-full min-w-0 max-w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full min-w-0 max-w-full appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
       </div>
 
@@ -42,7 +42,7 @@ export default function SleepForm({ onSubmit, isLoading }) {
         <input
           type="datetime-local"
           {...register('wake_at')}
-          className="w-full min-w-0 max-w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full min-w-0 max-w-full appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
       </div>
 
@@ -53,7 +53,7 @@ export default function SleepForm({ onSubmit, isLoading }) {
         </label>
         <select
           {...register('quality')}
-          className="w-full min-w-0 max-w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full min-w-0 max-w-full appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
         >
           <option value="">-</option>
           <option value="5">😄</option>
@@ -73,7 +73,7 @@ export default function SleepForm({ onSubmit, isLoading }) {
           type="text"
           placeholder="예: 낮잠, 밤에 두 번 깸"
           {...register('note')}
-          className="w-full min-w-0 max-w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full min-w-0 max-w-full appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
       </div>
 
