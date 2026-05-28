@@ -46,6 +46,9 @@ export default function FeedPage() {
     return acc
   }, {})
 
+  // 선택된 날 총 섭취량 (ml)
+  const totalMl = selectedFeeds.reduce((sum, f) => sum + (f.amount || 0), 0)
+
   const handleSubmit = async (data) => {
     await addFeed.mutateAsync(data)
     setShowForm(false)
@@ -110,9 +113,16 @@ export default function FeedPage() {
             {formatDate(selectedDate)}
           </h3>
           {selectedFeeds.length > 0 && (
-            <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-              총 {selectedFeeds.length}회
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                총 {selectedFeeds.length}회
+              </span>
+              {totalMl > 0 && (
+                <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                  {totalMl}ml
+                </span>
+              )}
+            </div>
           )}
         </div>
 
