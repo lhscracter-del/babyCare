@@ -4,12 +4,10 @@ from sqlalchemy import text
 
 from app.core.config import settings
 
-# Supabase Transaction Pooler(port 6543)는 prepared statement 미지원
-_is_pooler = "6543" in settings.DATABASE_URL
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=False,
-    connect_args={"statement_cache_size": 0} if _is_pooler else {},
+    pool_pre_ping=True,
 )
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
