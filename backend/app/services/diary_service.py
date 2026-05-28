@@ -1,5 +1,7 @@
+import re
 from pathlib import Path
 
+import cloudinary.uploader
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import HTTPException, status
@@ -13,6 +15,17 @@ DIARY_UPLOAD_DIR = Path(__file__).parent.parent.parent / "uploads" / "diaries"
 def _delete_image_file(image_path: str | None) -> None:
     if not image_path:
         return
+    if "cloudinary.com" in image_path:
+        try:
+            # URL에서 public_id 추출: .../upload/v숫자/babycare/diaries/uuid.jpg
+            after_upload = image_path.split("/upload/", 1)[1]
+            without_version = re.sub(r"^v\d+/", "", after_upload)
+            public_id = without_version.rsplit(".", 1)[0]
+            cloudinary.uploader.destroy(public_id)
+        except Exception:
+            pass
+        return
+    # 로컬 파일 (레거시 데이터 대응)
     filename = image_path.rsplit("/", 1)[-1]
     file_path = DIARY_UPLOAD_DIR / filename
     if file_path.exists():
