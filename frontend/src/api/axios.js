@@ -2,9 +2,14 @@
 
 import axios from 'axios'
 
+// 배포 환경은 VITE_API_URL, 로컬 개발 환경은 Vite 프록시(/api/v1) 사용
+const baseURL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api/v1`
+  : '/api/v1'
+
 // Axios 인스턴스를 만듭니다 (백엔드 서버 주소와 기본 설정 포함)
 const api = axios.create({
-  baseURL: '/api/v1', // FastAPI 서버 주소 (vite.config.js의 프록시를 통해 localhost:8000으로 전달됨)
+  baseURL,
   headers: {
     'Content-Type': 'application/json', // 데이터를 JSON 형식으로 주고받음
   },
