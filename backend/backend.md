@@ -10,6 +10,43 @@
 | FastAPI | 0.115.x | 최신 안정 버전 |
 | Uvicorn | 0.30.x | ASGI 서버 (표준) |
 
+## 서버 실행 방법
+
+### 1. 가상환경 생성 및 패키지 설치 (최초 1회)
+
+```bash
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 2. 서버 실행
+
+```bash
+# 가상환경 활성화
+source .venv/bin/activate
+
+# 개발 서버 실행 (코드 변경 시 자동 재시작)
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### 3. 접속 주소
+
+| 항목 | 주소 |
+|------|------|
+| API 서버 | http://localhost:8000 |
+| Swagger UI (API 문서) | http://localhost:8000/docs |
+| Health Check | http://localhost:8000/health |
+
+### 4. 서버 종료
+
+```bash
+# 터미널에서 Ctrl + C
+```
+
+---
+
 ## 패키지 매니저
 
 - `pip` / `uv`

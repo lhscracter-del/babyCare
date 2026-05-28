@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    CORS_ORIGINS: List[str] = ["http://localhost:5173","https://your-frontend.onrender.com"]
+    CORS_ORIGINS: List[str] = ["http://localhost:5173","https://babycare-1-wnd4.onrender.com"]
 
     class Config:
         env_file = ".env"
