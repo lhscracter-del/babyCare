@@ -1,6 +1,9 @@
+import { useState } from 'react'
 import { formatDate, todayString } from '../../utils/dateUtils'
 
 export default function VaccineList({ vaccines = [], onComplete, onDelete }) {
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+
   if (vaccines.length === 0) {
     return (
       <p className="text-center text-gray-400 text-sm py-6">
@@ -13,10 +16,6 @@ export default function VaccineList({ vaccines = [], onComplete, onDelete }) {
     if (a.is_completed === b.is_completed) return new Date(a.scheduled_at) - new Date(b.scheduled_at)
     return a.is_completed ? 1 : -1
   })
-
-  const handleDelete = (id) => {
-    if (window.confirm('이 접종 일정을 삭제하시겠어요?')) onDelete(id)
-  }
 
   return (
     <ul className="space-y-2">
@@ -55,12 +54,29 @@ export default function VaccineList({ vaccines = [], onComplete, onDelete }) {
               </div>
 
               {onDelete && (
-                <button
-                  onClick={() => handleDelete(vaccine.id)}
-                  className="flex-shrink-0 px-3 py-2 text-sm text-red-500 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100 active:bg-red-200 transition-colors"
-                >
-                  삭제
-                </button>
+                confirmDeleteId === vaccine.id ? (
+                  <div className="flex gap-1 flex-shrink-0">
+                    <button
+                      onClick={() => { onDelete(vaccine.id); setConfirmDeleteId(null) }}
+                      className="text-xs bg-red-500 text-white px-2 py-1 rounded-lg"
+                    >
+                      확인
+                    </button>
+                    <button
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-lg"
+                    >
+                      취소
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setConfirmDeleteId(vaccine.id)}
+                    className="flex-shrink-0 px-3 py-2 text-sm text-red-500 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100 active:bg-red-200 transition-colors"
+                  >
+                    삭제
+                  </button>
+                )
               )}
             </div>
           </li>

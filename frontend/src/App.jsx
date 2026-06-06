@@ -38,6 +38,7 @@ function ChildManagerSheet({ children, selectedChild, onClose, onSelect, onSave,
   const [editingChild, setEditingChild] = useState(null)
   const [form, setForm] = useState({ name: '', birth_date: '', gender: 'M' })
   const [saving, setSaving] = useState(false)
+  const [confirmDeleteChildId, setConfirmDeleteChildId] = useState(null)
 
   const startEdit = (child) => {
     setEditingChild(child)
@@ -62,10 +63,9 @@ function ChildManagerSheet({ children, selectedChild, onClose, onSelect, onSave,
     }
   }
 
-  const handleDelete = async (child) => {
-    if (!window.confirm(`${child.name}의 모든 기록이 함께 삭제됩니다.\n정말 삭제하시겠어요?`)) return
-    await onDelete(child.id)
-    // 삭제한 아이가 열려있던 경우 목록으로 돌아가기
+  const handleDelete = async (childId) => {
+    await onDelete(childId)
+    setConfirmDeleteChildId(null)
     setMode('list')
   }
 
@@ -137,12 +137,29 @@ function ChildManagerSheet({ children, selectedChild, onClose, onSelect, onSave,
                         >
                           수정
                         </button>
-                        <button
-                          onClick={() => handleDelete(child)}
-                          className="text-xs text-gray-400 hover:text-red-500 transition-colors px-2 py-1 rounded-lg hover:bg-red-50"
-                        >
-                          삭제
-                        </button>
+                        {confirmDeleteChildId === child.id ? (
+                          <>
+                            <button
+                              onClick={() => handleDelete(child.id)}
+                              className="text-xs bg-red-500 text-white px-2 py-1 rounded-lg"
+                            >
+                              확인
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteChildId(null)}
+                              className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-lg"
+                            >
+                              취소
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmDeleteChildId(child.id)}
+                            className="text-xs text-gray-400 hover:text-red-500 transition-colors px-2 py-1 rounded-lg hover:bg-red-50"
+                          >
+                            삭제
+                          </button>
+                        )}
                       </div>
                     </li>
                   )
@@ -236,7 +253,7 @@ function ChildManagerSheet({ children, selectedChild, onClose, onSelect, onSave,
 
 function ChildSetup({ onRegistered }) {
   const queryClient = useQueryClient()
-  const { register, handleSubmit } = useForm()
+  const { register, handleSubmit } = useForm({ defaultValues: { gender: 'M' } })
 
   const createMutation = useMutation({
     mutationFn: createChild,

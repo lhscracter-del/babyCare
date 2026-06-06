@@ -10,8 +10,8 @@ import { todayString, formatDate } from '../utils/dateUtils'
 
 // 날짜별 접종 상태 → 캘린더 점 색상 결정
 // 완료: bg-green-400 / 지남(미완료): bg-red-400 / 예정: bg-purple-400
-function calcDotColor(vaccines, dateStr, todayStr) {
-  const onDate = vaccines.filter((v) => v.scheduled_at === dateStr)
+// onDate: 해당 날짜의 접종 목록 (이미 날짜별로 그룹화된 배열)
+function calcDotColor(onDate, dateStr, todayStr) {
   if (onDate.length === 0) return null
 
   const allDone = onDate.every((v) => v.is_completed)
@@ -38,12 +38,20 @@ export default function VaccinePage() {
   const totalCount = vaccines.length
 
   // 날짜별 점 색상 맵 — { "YYYY-MM-DD": "bg-green-400" | "bg-red-400" | "bg-purple-400" }
+  // 날짜별로 한 번만 그룹화한 뒤 그룹당 한 번씩 색상을 계산하여 O(N²) → O(N)으로 개선
   const markedDatesMap = useMemo(() => {
-    const map = {}
+    // 1) 날짜별로 접종을 그룹화
+    const byDate = {}
     vaccines.forEach((v) => {
       if (!v.scheduled_at) return
-      const color = calcDotColor(vaccines, v.scheduled_at, todayStr)
-      if (color) map[v.scheduled_at] = color
+      if (!byDate[v.scheduled_at]) byDate[v.scheduled_at] = []
+      byDate[v.scheduled_at].push(v)
+    })
+    // 2) 그룹마다 점 색상 계산
+    const map = {}
+    Object.entries(byDate).forEach(([dateStr, list]) => {
+      const color = calcDotColor(list, dateStr, todayStr)
+      if (color) map[dateStr] = color
     })
     return map
   }, [vaccines, todayStr])

@@ -1,0 +1,1 @@
+- [Project Stack & Baseline](project_stack_baseline.md) — babyCare stack, data-shape quirks, verify commands, and applied perf fixes

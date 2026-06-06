@@ -1,6 +1,6 @@
 // 일기 페이지 — 캘린더로 날짜를 선택해서 그 날의 일기를 봅니다
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Card from '../components/common/Card'
 import Calendar from '../components/common/Calendar'
 import DiaryForm from '../components/diary/DiaryForm'
@@ -19,7 +19,8 @@ export default function DiaryPage() {
 
   // 일기가 있는 날짜 목록 → 캘린더에 노란 점으로 표시
   // 일기의 entry_date는 "YYYY-MM-DD" 형식이라 바로 사용합니다
-  const markedDates = diaries.map((d) => d.entry_date)
+  // diaries가 바뀔 때만 재계산 (매 렌더마다 매핑 방지)
+  const markedDates = useMemo(() => diaries.map((d) => d.entry_date), [diaries])
 
   // 선택된 날짜의 일기만 걸러냅니다
   const selectedDiaries = diaries.filter((d) => d.entry_date === selectedDate)

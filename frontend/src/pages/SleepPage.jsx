@@ -1,6 +1,6 @@
 // 수면 기록 페이지 — 캘린더로 날짜를 선택해서 해당 날의 수면 기록을 봅니다
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Card from '../components/common/Card'
 import Calendar from '../components/common/Calendar'
 import SleepForm from '../components/sleep/SleepForm'
@@ -26,7 +26,11 @@ export default function SleepPage() {
   const sleeps = sleepsQuery.data || []
 
   // 기록이 있는 날짜 목록 → 캘린더에 점(dot)으로 표시됩니다
-  const markedDates = [...new Set(sleeps.map((s) => extractDate(s.sleep_at)))]
+  // sleeps가 바뀔 때만 재계산 (매 렌더마다 Set 생성·매핑 방지)
+  const markedDates = useMemo(
+    () => [...new Set(sleeps.map((s) => extractDate(s.sleep_at)))],
+    [sleeps]
+  )
 
   // 선택된 날짜의 수면 기록만 걸러냅니다
   const selectedSleeps = sleeps.filter((s) => extractDate(s.sleep_at) === selectedDate)

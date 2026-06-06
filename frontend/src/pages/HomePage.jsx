@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import Card from '../components/common/Card'
@@ -74,45 +75,62 @@ export default function HomePage() {
     .slice(0, 3)
 
   // 마지막 기록 시간
-  const lastFeed = [...feeds].sort((a, b) => new Date(b.fed_at) - new Date(a.fed_at))[0]
-  const lastSleep = [...sleeps].sort((a, b) => new Date(b.sleep_at) - new Date(a.sleep_at))[0]
-  const lastDiaper = [...diapers].sort((a, b) => new Date(b.changed_at) - new Date(a.changed_at))[0]
+  // 서버가 이미 시각 내림차순으로 정렬해 반환하므로 첫 번째 항목이 가장 최근 기록입니다
+  // (매 렌더마다 전체 배열을 복사·재정렬하던 중복 로직 제거)
+  const lastFeed = feeds[0]
+  const lastSleep = sleeps[0]
+  const lastDiaper = diapers[0]
 
   // 전체 기록을 내림차순으로 합친 리스트
-  const allRecords = [
-    ...feeds.map((f) => ({
-      key: `feed-${f.id}`,
-      time: f.fed_at,
-      icon: '🍼',
-      label: FEED_TYPE_LABEL[f.feed_type] || f.feed_type,
-      sub: f.amount ? `${f.amount}ml` : '',
-      to: '/feed',
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
-    })),
-    ...sleeps.map((s) => ({
-      key: `sleep-${s.id}`,
-      time: s.sleep_at,
-      icon: '😴',
-      label: s.wake_at ? `수면 ${formatDuration(s.sleep_at, s.wake_at)}` : '수면 중',
-      sub: '',
-      to: '/sleep',
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-50',
-    })),
-    ...diapers.map((d) => ({
-      key: `diaper-${d.id}`,
-      time: d.changed_at,
-      icon: '🧷',
-      label: DIAPER_TYPE_LABEL[d.type] || d.type,
-      sub: d.note || '',
-      to: '/diaper',
-      color: 'text-yellow-600',
-      bg: 'bg-yellow-50',
-    })),
-  ]
-    .sort((a, b) => new Date(b.time) - new Date(a.time))
-    .slice(0, 20)
+  // feeds/sleeps/diapers가 바뀔 때만 재계산 (매 렌더마다 병합·정렬 방지)
+  const allRecords = useMemo(
+    () =>
+      [
+        ...feeds.map((f) => ({
+          key: `feed-${f.id}`,
+          time: f.fed_at,
+          icon: '🍼',
+          label: FEED_TYPE_LABEL[f.feed_type] || f.feed_type,
+          sub: f.amount ? `${f.amount}ml` : '',
+          to: '/feed',
+          color: 'text-blue-600',
+          bg: 'bg-blue-50',
+        })),
+        ...sleeps.map((s) => ({
+          key: `sleep-${s.id}`,
+          time: s.sleep_at,
+          icon: '😴',
+          label: s.wake_at ? `수면 ${formatDuration(s.sleep_at, s.wake_at)}` : '수면 중',
+          sub: '',
+          to: '/sleep',
+          color: 'text-indigo-600',
+          bg: 'bg-indigo-50',
+        })),
+        ...diapers.map((d) => ({
+          key: `diaper-${d.id}`,
+          time: d.changed_at,
+          icon: '🧷',
+          label: DIAPER_TYPE_LABEL[d.type] || d.type,
+          sub: d.note || '',
+          to: '/diaper',
+          color: 'text-yellow-600',
+          bg: 'bg-yellow-50',
+        })),
+      ]
+        .sort((a, b) => new Date(b.time) - new Date(a.time))
+        .slice(0, 20),
+    [feeds, sleeps, diapers]
+  )
+
+  if (!childId) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-gray-400">
+        <div className="text-5xl mb-4">👶</div>
+        <p className="text-lg font-medium text-gray-500">아이를 선택해 주세요</p>
+        <p className="text-sm mt-1 text-center">상단에서 아이를 선택하면 기록을 볼 수 있어요</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">

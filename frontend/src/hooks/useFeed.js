@@ -17,16 +17,28 @@ export function useFeed() {
   const addFeed = useMutation({
     mutationFn: (data) => createFeed(childId, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['feeds', childId] }),
+    onError: (error) => {
+      const msg = error?.response?.data?.detail || '수유 기록 저장에 실패했습니다. 다시 시도해 주세요.'
+      window.alert(msg)
+    },
   })
 
   const editFeed = useMutation({
     mutationFn: ({ recordId, data }) => updateFeed(childId, recordId, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['feeds', childId] }),
+    onError: (error) => {
+      const msg = error?.response?.data?.detail || '수유 기록 수정에 실패했습니다. 다시 시도해 주세요.'
+      window.alert(msg)
+    },
   })
 
   const removeFeed = useMutation({
     mutationFn: (recordId) => deleteFeed(childId, recordId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['feeds', childId] }),
+    onError: (error) => {
+      const msg = error?.response?.data?.detail || '수유 기록 삭제에 실패했습니다. 다시 시도해 주세요.'
+      window.alert(msg)
+    },
   })
 
   return { feedsQuery, addFeed, editFeed, removeFeed }

@@ -4,6 +4,7 @@ import ImageViewModal from '../common/ImageViewModal'
 
 export default function DiaryList({ diaries = [], onDelete }) {
   const [viewingSrc, setViewingSrc] = useState(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   if (diaries.length === 0) {
     return (
@@ -11,10 +12,6 @@ export default function DiaryList({ diaries = [], onDelete }) {
         첫 번째 일기를 작성해 보세요. 📝
       </p>
     )
-  }
-
-  const handleDelete = (id) => {
-    if (window.confirm('이 일기를 삭제하시겠어요?')) onDelete(id)
   }
 
   return (
@@ -33,12 +30,29 @@ export default function DiaryList({ diaries = [], onDelete }) {
                 )}
               </div>
               {onDelete && (
-                <button
-                  onClick={() => handleDelete(diary.id)}
-                  className="flex-shrink-0 px-3 py-2 text-sm text-red-500 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100 active:bg-red-200 transition-colors"
-                >
-                  삭제
-                </button>
+                confirmDeleteId === diary.id ? (
+                  <div className="flex gap-1 flex-shrink-0">
+                    <button
+                      onClick={() => { onDelete(diary.id); setConfirmDeleteId(null) }}
+                      className="text-xs bg-red-500 text-white px-2 py-1 rounded-lg"
+                    >
+                      확인
+                    </button>
+                    <button
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-lg"
+                    >
+                      취소
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setConfirmDeleteId(diary.id)}
+                    className="flex-shrink-0 px-3 py-2 text-sm text-red-500 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100 active:bg-red-200 transition-colors"
+                  >
+                    삭제
+                  </button>
+                )
               )}
             </div>
 

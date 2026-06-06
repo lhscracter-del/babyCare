@@ -17,16 +17,28 @@ export function useSleep() {
   const addSleep = useMutation({
     mutationFn: (data) => createSleep(childId, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sleeps', childId] }),
+    onError: (error) => {
+      const msg = error?.response?.data?.detail || '수면 기록 저장에 실패했습니다. 다시 시도해 주세요.'
+      window.alert(msg)
+    },
   })
 
   const editSleep = useMutation({
     mutationFn: ({ recordId, data }) => updateSleep(childId, recordId, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sleeps', childId] }),
+    onError: (error) => {
+      const msg = error?.response?.data?.detail || '수면 기록 수정에 실패했습니다. 다시 시도해 주세요.'
+      window.alert(msg)
+    },
   })
 
   const removeSleep = useMutation({
     mutationFn: (recordId) => deleteSleep(childId, recordId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sleeps', childId] }),
+    onError: (error) => {
+      const msg = error?.response?.data?.detail || '수면 기록 삭제에 실패했습니다. 다시 시도해 주세요.'
+      window.alert(msg)
+    },
   })
 
   return { sleepsQuery, addSleep, editSleep, removeSleep }

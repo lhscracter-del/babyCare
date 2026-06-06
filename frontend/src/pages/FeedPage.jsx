@@ -1,6 +1,6 @@
 // 수유/식사 기록 페이지 — 캘린더로 날짜를 선택해서 해당 날의 기록을 봅니다
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Card from '../components/common/Card'
 import Calendar from '../components/common/Calendar'
 import FeedForm from '../components/feed/FeedForm'
@@ -34,7 +34,11 @@ export default function FeedPage() {
   const feeds = feedsQuery.data || []
 
   // 기록이 있는 날짜 목록 → 캘린더에 파란 점으로 표시
-  const markedDates = [...new Set(feeds.map((f) => extractDate(f.fed_at)))]
+  // feeds가 바뀔 때만 재계산 (매 렌더마다 Set 생성·매핑 방지)
+  const markedDates = useMemo(
+    () => [...new Set(feeds.map((f) => extractDate(f.fed_at)))],
+    [feeds]
+  )
 
   // 선택된 날짜의 수유 기록만 걸러냅니다
   const selectedFeeds = feeds.filter((f) => extractDate(f.fed_at) === selectedDate)

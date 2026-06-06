@@ -17,16 +17,28 @@ export function useDiary() {
   const addDiary = useMutation({
     mutationFn: (data) => createDiary(childId, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['diaries', childId] }),
+    onError: (error) => {
+      const msg = error?.response?.data?.detail || '일기 저장에 실패했습니다. 다시 시도해 주세요.'
+      window.alert(msg)
+    },
   })
 
   const editDiary = useMutation({
     mutationFn: ({ recordId, data }) => updateDiary(childId, recordId, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['diaries', childId] }),
+    onError: (error) => {
+      const msg = error?.response?.data?.detail || '일기 수정에 실패했습니다. 다시 시도해 주세요.'
+      window.alert(msg)
+    },
   })
 
   const removeDiary = useMutation({
     mutationFn: (recordId) => deleteDiary(childId, recordId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['diaries', childId] }),
+    onError: (error) => {
+      const msg = error?.response?.data?.detail || '일기 삭제에 실패했습니다. 다시 시도해 주세요.'
+      window.alert(msg)
+    },
   })
 
   return { diariesQuery, addDiary, editDiary, removeDiary }

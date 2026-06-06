@@ -1,14 +1,13 @@
+import { useState } from 'react'
 import { formatTime, formatDate, isToday } from '../../utils/dateUtils'
 import { formatDuration, formatQuality } from '../../utils/timeUtils'
 
 export default function SleepList({ sleeps = [], hideEmpty = false, onDelete }) {
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+
   if (sleeps.length === 0) {
     if (hideEmpty) return null
     return <p className="text-center text-gray-400 text-sm py-6">아직 수면 기록이 없어요.</p>
-  }
-
-  const handleDelete = (id) => {
-    if (window.confirm('이 수면 기록을 삭제하시겠어요?')) onDelete(id)
   }
 
   return (
@@ -35,12 +34,29 @@ export default function SleepList({ sleeps = [], hideEmpty = false, onDelete }) 
               {sleep.note && <p className="text-xs text-gray-400 mt-0.5">{sleep.note}</p>}
             </div>
             {onDelete && (
-              <button
-                onClick={() => handleDelete(sleep.id)}
-                className="flex-shrink-0 px-3 py-2 text-sm text-red-500 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100 active:bg-red-200 transition-colors"
-              >
-                삭제
-              </button>
+              confirmDeleteId === sleep.id ? (
+                <div className="flex gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => { onDelete(sleep.id); setConfirmDeleteId(null) }}
+                    className="text-xs bg-red-500 text-white px-2 py-1 rounded-lg"
+                  >
+                    확인
+                  </button>
+                  <button
+                    onClick={() => setConfirmDeleteId(null)}
+                    className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-lg"
+                  >
+                    취소
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmDeleteId(sleep.id)}
+                  className="flex-shrink-0 px-3 py-2 text-sm text-red-500 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100 active:bg-red-200 transition-colors"
+                >
+                  삭제
+                </button>
+              )
             )}
           </div>
         </li>

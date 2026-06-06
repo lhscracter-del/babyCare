@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { formatTime, formatDate, isToday } from '../../utils/dateUtils'
 
 const FEED_TYPES = [
@@ -11,6 +12,7 @@ const FEED_TYPES = [
 const FEED_TYPE_LABEL = Object.fromEntries(FEED_TYPES.map((t) => [t.value, t.label]))
 
 export default function FeedList({ feeds = [], showAll = true, onDelete }) {
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
   const displayFeeds = showAll ? feeds : feeds.filter((f) => isToday(f.fed_at))
 
   if (displayFeeds.length === 0) {
@@ -19,10 +21,6 @@ export default function FeedList({ feeds = [], showAll = true, onDelete }) {
         {showAll ? '아직 수유 기록이 없어요.' : '오늘 수유 기록이 없어요.'}
       </p>
     )
-  }
-
-  const handleDelete = (id) => {
-    if (window.confirm('이 수유 기록을 삭제하시겠어요?')) onDelete(id)
   }
 
   return (
@@ -43,12 +41,29 @@ export default function FeedList({ feeds = [], showAll = true, onDelete }) {
                 {!isToday(feed.fed_at) && <div>{formatDate(feed.fed_at)}</div>}
               </div>
               {onDelete && (
-                <button
-                  onClick={() => handleDelete(feed.id)}
-                  className="px-3 py-2 text-sm text-red-500 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100 active:bg-red-200 transition-colors"
-                >
-                  삭제
-                </button>
+                confirmDeleteId === feed.id ? (
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => { onDelete(feed.id); setConfirmDeleteId(null) }}
+                      className="text-xs bg-red-500 text-white px-2 py-1 rounded-lg"
+                    >
+                      확인
+                    </button>
+                    <button
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-lg"
+                    >
+                      취소
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setConfirmDeleteId(feed.id)}
+                    className="px-3 py-2 text-sm text-red-500 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100 active:bg-red-200 transition-colors"
+                  >
+                    삭제
+                  </button>
+                )
               )}
             </div>
           </div>

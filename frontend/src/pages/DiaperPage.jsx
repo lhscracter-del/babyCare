@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Card from '../components/common/Card'
 import Calendar from '../components/common/Calendar'
 import DiaperForm from '../components/diaper/DiaperForm'
@@ -23,7 +23,11 @@ export default function DiaperPage() {
   const [selectedDate, setSelectedDate] = useState(todayString())
 
   const diapers = diapersQuery.data || []
-  const markedDates = [...new Set(diapers.map((d) => extractDate(d.changed_at)))]
+  // diapers가 바뀔 때만 재계산 (매 렌더마다 Set 생성·매핑 방지)
+  const markedDates = useMemo(
+    () => [...new Set(diapers.map((d) => extractDate(d.changed_at)))],
+    [diapers]
+  )
   const selectedDiapers = diapers.filter((d) => extractDate(d.changed_at) === selectedDate)
 
   // 오늘 종류별 횟수 집계

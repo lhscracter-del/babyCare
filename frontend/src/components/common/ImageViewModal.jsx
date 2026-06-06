@@ -1,6 +1,10 @@
 // 이미지 원본 보기 라이트박스 모달
 
+import { useState } from 'react'
+
 export default function ImageViewModal({ src, onClose }) {
+  const [loaded, setLoaded] = useState(false)
+
   if (!src) return null
 
   return (
@@ -14,10 +18,16 @@ export default function ImageViewModal({ src, onClose }) {
       >
         ✕
       </button>
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="text-white text-sm animate-pulse">이미지 로딩 중...</div>
+        </div>
+      )}
       <img
         src={src}
         alt="원본 이미지"
         className="max-w-full max-h-full object-contain"
+        onLoad={() => setLoaded(true)}
         onClick={(e) => e.stopPropagation()}
       />
     </div>

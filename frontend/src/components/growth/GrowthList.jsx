@@ -73,7 +73,14 @@ function LineChart({ data, color }) {
       {points.map((p, i) => {
         const isHovered = hoveredIdx === i
         return (
-          <g key={i} onMouseEnter={() => setHoveredIdx(i)} style={{ cursor: 'pointer' }}>
+          <g
+            key={i}
+            onMouseEnter={() => setHoveredIdx(i)}
+            onMouseLeave={() => setHoveredIdx(null)}
+            onTouchStart={() => setHoveredIdx(i)}
+            onTouchEnd={() => setTimeout(() => setHoveredIdx(null), 1500)}
+            style={{ cursor: 'pointer' }}
+          >
             <circle cx={p.x} cy={p.y} r={12} fill="transparent" />
             <circle
               cx={p.x}
@@ -128,6 +135,7 @@ const TABS = [
 
 export default function GrowthList({ growths = [], onDelete }) {
   const [activeTab, setActiveTab] = useState('weight')
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   if (growths.length === 0) {
     return <p className="text-center text-gray-400 text-sm py-6">아직 성장 기록이 없어요.</p>
@@ -139,10 +147,6 @@ export default function GrowthList({ growths = [], onDelete }) {
     .filter((g) => g[activeTab] != null)
     .sort((a, b) => a.measured_at.localeCompare(b.measured_at))
     .map((g) => ({ value: g[activeTab], date: g.measured_at }))
-
-  const handleDelete = (id) => {
-    if (window.confirm('이 성장 기록을 삭제하시겠어요?')) onDelete(id)
-  }
 
   return (
     <div className="space-y-4">
@@ -170,7 +174,7 @@ export default function GrowthList({ growths = [], onDelete }) {
         ) : (
           <>
             <div className="flex justify-between items-center mb-1">
-              <p className="text-xs text-gray-400">포인트에 마우스를 올리면 날짜가 표시됩니다</p>
+              <p className="text-xs text-gray-400">포인트를 터치하거나 마우스를 올리면 날짜가 표시됩니다</p>
               <p className="text-xs text-gray-400">단위: {currentTab.unit}</p>
             </div>
             <LineChart data={chartData} color={currentTab.color} />
@@ -212,12 +216,29 @@ export default function GrowthList({ growths = [], onDelete }) {
                   </div>
                 </div>
                 {onDelete && (
-                  <button
-                    onClick={() => handleDelete(growth.id)}
-                    className="flex-shrink-0 px-3 py-2 text-sm text-red-500 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100 active:bg-red-200 transition-colors"
-                  >
-                    삭제
-                  </button>
+                  confirmDeleteId === growth.id ? (
+                    <div className="flex gap-1 flex-shrink-0">
+                      <button
+                        onClick={() => { onDelete(growth.id); setConfirmDeleteId(null) }}
+                        className="text-xs bg-red-500 text-white px-2 py-1 rounded-lg"
+                      >
+                        확인
+                      </button>
+                      <button
+                        onClick={() => setConfirmDeleteId(null)}
+                        className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-lg"
+                      >
+                        취소
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmDeleteId(growth.id)}
+                      className="flex-shrink-0 px-3 py-2 text-sm text-red-500 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100 active:bg-red-200 transition-colors"
+                    >
+                      삭제
+                    </button>
+                  )
                 )}
               </div>
             </li>
